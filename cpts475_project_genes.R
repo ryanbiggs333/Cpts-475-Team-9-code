@@ -15,19 +15,26 @@ gene_sequence <- read.csv("donor_art_seq_468.csv", header = TRUE)
 
 # the mentor suggested to go to the Project_Code column and 
 #extract the first word using the - as the separator
+#we also extract the second word for potential use in the future
+
 gene_tissue_raw_data <- gene_tissue_raw_data %>%
-  mutate(Project_Type = sub("-.*", "", Project_Code))
-view(gene_tissue_raw_data)
+    separate(Project_Code, into = c("Project_Type", "Cancer_Type"))
+
 
 donor_sequence_data <- read.csv("donor_art_seq_468.csv", header = TRUE)
 
 # put that word into a new column in the donor_art_seq_468.csv file, 
 # using the Donor_id column from the second csv file and to match it to 
 # the sample id column from the donor_art_seq_468.csv file.
+# repeat same process for second word
 donor_sequence_data <- donor_sequence_data %>%
   left_join(select(gene_tissue_raw_data, Donor_ID, Project_Type), by = c("sample.id" = "Donor_ID"))
+donor_sequence_data <- donor_sequence_data %>%
+  left_join(select(gene_tissue_raw_data, Donor_ID, Cancer_Type), by = c("sample.id" = "Donor_ID"))
+
 view(donor_sequence_data)
-write.csv(donor_sequence_data, file = "v2", row.names = FALSE)
+write.csv(donor_sequence_data, file = "v2.csv", row.names = FALSE)
+
 
 selected <- select(gene_tissue_data, Donor_ID, tumor_gene_uni)
 
@@ -110,3 +117,5 @@ gene_frequency %>%
   filter(n() > 1) %>%
   arrange(desc(n())) %>%
   print(n=205)
+
+
